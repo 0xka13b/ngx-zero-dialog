@@ -67,22 +67,18 @@ export class NgxZeroDialogHost<HostData> {
    * @private
    */
   #closeOnBackdropClick() {
-    this.dialogRef.nativeDialog.addEventListener(
-      'click',
-      (event) => {
-        const rect = this.dialogRef.nativeDialog.getBoundingClientRect();
-        const isInDialog =
-          rect.top <= event.clientY &&
-          event.clientY <= rect.top + rect.height &&
-          rect.left <= event.clientX &&
-          event.clientX <= rect.left + rect.width;
+    this.dialogRef.nativeDialog.addEventListener('click', (event) => {
+      const rect = this.dialogRef.nativeDialog.getBoundingClientRect();
+      const isInDialog =
+        rect.top <= event.clientY &&
+        event.clientY <= rect.top + rect.height &&
+        rect.left <= event.clientX &&
+        event.clientX <= rect.left + rect.width;
 
-        if (!isInDialog) {
-          this.dialogRef.close();
-        }
-      },
-      { once: true }
-    );
+      if (!isInDialog) {
+        this.dialogRef.close();
+      }
+    });
   }
 
   #closeOnEsc() {

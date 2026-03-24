@@ -35,6 +35,8 @@ import { NGX_ZERO_DIALOG_CONFIG } from './providers/provide-ngx-zero-dialog';
  */
 @Injectable({ providedIn: 'root' })
 export class NgxZeroDialogService {
+  private dialogCounter = 0;
+
   private readonly ngxZeroDialogConfig = inject<INgxZeroDialogConfig>(
     NGX_ZERO_DIALOG_CONFIG
   );
@@ -59,6 +61,13 @@ export class NgxZeroDialogService {
     config?: IDialogConfig
   ): Observable<DialogResult<Result>> {
     return defer(() => {
+      if (!config?.hostComponent) {
+        throw new Error(
+          'NgxZeroDialog: `hostComponent` is required in dialog config. ' +
+            'Provide a component that extends NgxZeroDialogHost.'
+        );
+      }
+
       const normalizedConfig = this.normalizeConfig(config);
 
       const dialogRef = this.createDialogRef<Result>(normalizedConfig);
@@ -86,9 +95,20 @@ export class NgxZeroDialogService {
 
       this.appRef.attachView(hostComponentRef.hostView);
 
-      this.document
-        .getElementById(this.ngxZeroDialogConfig.containerNodeID)!
-        .appendChild(dialogRef.nativeDialog);
+      const containerNode = this.document.getElementById(
+        this.ngxZeroDialogConfig.containerNodeID
+      );
+
+      if (!containerNode) {
+        throw new Error(
+          `NgxZeroDialog: container element with id "${this.ngxZeroDialogConfig.containerNodeID}" ` +
+            'was not found in the DOM. Add <div id="' +
+            this.ngxZeroDialogConfig.containerNodeID +
+            '"></div> to your index.html or root component template.'
+        );
+      }
+
+      containerNode.appendChild(dialogRef.nativeDialog);
 
       dialogRef.nativeDialog.appendChild(
         this.getComponentRootNode(hostComponentRef)
@@ -142,7 +162,7 @@ export class NgxZeroDialogService {
    */
   private createDialogRef<Result>(config: IDialogConfig): DialogRef<Result> {
     const newDialog = document.createElement('dialog');
-    const dialogID = `dialog-${Date.now()}`;
+    const dialogID = `ngx-zero-dialog-${++this.dialogCounter}`;
 
     newDialog.setAttribute('aria-modal', 'true');
     newDialog.setAttribute('role', 'dialog');
@@ -183,8 +203,8 @@ export class NgxZeroDialogService {
     dialogHostRef.destroy();
 
     this.document
-      .getElementById(this.ngxZeroDialogConfig.containerNodeID)!
-      .removeChild(this.document.getElementById(dialogID)!);
+      .getElementById(this.ngxZeroDialogConfig.containerNodeID)
+      ?.removeChild(this.document.getElementById(dialogID)!);
   }
 
   /**

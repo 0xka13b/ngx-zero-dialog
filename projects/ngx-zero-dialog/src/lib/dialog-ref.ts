@@ -52,14 +52,23 @@ export class DialogRef<Result = unknown> {
    */
   #terminateAnimatedDialog(value?: DialogResult<Result>) {
     if (this.animated) {
+      let terminated = false;
+
+      const terminate = () => {
+        if (terminated) return;
+        terminated = true;
+        clearTimeout(fallbackTimer);
+        this.#terminateDialog(value);
+      };
+
       this.nativeDialog.classList.remove('ngx-zero-dialog-visible');
-      this.nativeDialog.addEventListener(
-        'transitionend',
-        () => {
-          this.#terminateDialog(value);
-        },
-        { once: true }
-      );
+      this.nativeDialog.addEventListener('transitionend', terminate, {
+        once: true,
+      });
+
+      // Safety fallback: if transitionend never fires (e.g. prefers-reduced-motion,
+      // no transition property, tab backgrounded), close after a reasonable timeout.
+      const fallbackTimer = setTimeout(terminate, 300);
     } else {
       this.#terminateDialog(value);
     }
