@@ -29,42 +29,38 @@ import { DialogHostComponent } from './dialog-host/dialog-host.component';
   ],
 })
 export class TemplateExampleComponent {
-  private readonly ngxZeroDialogService = inject(NgxZeroDialogService);
+  private readonly dialog = inject(NgxZeroDialogService);
 
   readonly countryCtrl = new FormControl('');
 
   readonly mode = signal<'code' | 'demo'>('demo');
 
   readonly htmlCode = `
-    <input
-      type="text"
-      [formControl]="countryCtrl"
-      placeholder="Where are you from?"
-    />
-    <button (click)="openTemplateBasedDialog(dialogTemplate)">Open dialog</button>
-
+    <!-- The template gets dialogRef and data as context variables -->
     <ng-template #dialogTemplate let-dialogRef let-data="data">
-      Your country is {{ data.country }}
-      <button (click)="dialogRef.close()">Close</button>
+      <div class="dialog-body">
+        Your country is <strong>{{ data.country || 'Unknown' }}</strong>
+        <button (click)="dialogRef.close()">Got it</button>
+      </div>
     </ng-template>
   `;
 
   readonly tsCode = `
-    @Component({
-      ...
-    })
+    import { NgxZeroDialogService } from 'ngx-zero-dialog';
+
+    @Component({ ... })
     export class TemplateExampleComponent {
-      private readonly ngxZeroDialogService = inject(NgxZeroDialogService);
+      private readonly dialog = inject(NgxZeroDialogService);
 
       readonly countryCtrl = new FormControl('');
 
-      openTemplateBasedDialog(templateRef: TemplateRef<unknown>) {
-        this.ngxZeroDialogService
+      openDialog(templateRef: TemplateRef<unknown>) {
+        this.dialog
           .openDialog(templateRef, {
             hostComponent: DialogHostComponent,
             hostData: {
               title: 'Template-based dialog',
-              closable: false,
+              closable: false,  // hides the close button in host
             },
             dialogData: {
               country: this.countryCtrl.value,
@@ -76,6 +72,8 @@ export class TemplateExampleComponent {
   `;
 
   readonly dialogHostCode = `
+    import { DialogContentDirective, NgxZeroDialogHost } from 'ngx-zero-dialog';
+
     interface DialogHostData {
       title: string;
       closable?: boolean;
@@ -85,31 +83,25 @@ export class TemplateExampleComponent {
       standalone: true,
       selector: 'app-dialog-host',
       template: \`
-        <div class="title">
-          {{ hostData.title }}
-          <img *ngIf="hostData.closable ?? true" src="close.svg" (click)="close()">
-        </div>
+        <div class="title">{{ hostData.title }}</div>
+        @if (hostData.closable !== false) {
+          <button class="close" (click)="close()">&times;</button>
+        }
         <div class="content">
           <ng-template dialogContent></ng-template>
         </div>
-
       \`,
-      styleUrl: 'dialog-host.component.scss',
-      imports: [DialogContentDirective, CommonModule],
+      imports: [DialogContentDirective],
     })
     export class DialogHostComponent extends NgxZeroDialogHost<DialogHostData> {
-      constructor() {
-        super();
-      }
+      constructor() { super(); }
 
-      close() {
-        this.dialogRef.close();
-      }
+      close() { this.dialogRef.close(); }
     }
   `;
 
   openTemplateBasedDialog(templateRef: TemplateRef<unknown>) {
-    this.ngxZeroDialogService
+    this.dialog
       .openDialog(templateRef, {
         hostComponent: DialogHostComponent,
         hostData: {

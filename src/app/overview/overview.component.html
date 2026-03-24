@@ -1,22 +1,29 @@
 <h2>Overview</h2>
 
 <p class="text">
-  <code>ngx-zero-dialog</code> is a lightweight, performance-focused Angular library designed
-  to make creation of modal dialogs more flexible and maintainable. Built on the
-  native HTML Dialog API, it leverages browser capabilities to enhance
-  performance, ensure accessibility, and minimize code complexity.
+  <code>ngx-zero-dialog</code> is a lightweight, zero-dependency Angular library for
+  modal dialogs built on the native HTML
+  <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dialog">&lt;dialog&gt;</a>
+  API. It leverages browser capabilities for focus trapping, backdrop,
+  accessibility, and stacking context &mdash; no CDK or overlay system needed.
 </p>
 
 <p class="text">
-  When exploring the demo examples, open DevTools to observe how the DOM changes
-  throughout the process.
+  Key features:
 </p>
 
+<ul class="features">
+  <li>Open dialogs with a <strong>Component</strong> or <strong>TemplateRef</strong></li>
+  <li>Built-in default host &mdash; or bring your own for consistent dialog chrome</li>
+  <li>Observable-based API with typed results</li>
+  <li><code>beforeClose</code> guard to intercept and prevent closing</li>
+  <li>Pure CSS enter/leave animations via class toggling</li>
+  <li>Configurable backdrop click and Escape key behavior</li>
+</ul>
+
 <p class="text">
-  For more information about Dialog API, refer to the
-  <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dialog"
-    >MDN documentation</a
-  >
+  When exploring the demo examples, open DevTools to observe how each dialog
+  is reflected in the DOM.
 </p>
 
 <blockquote>

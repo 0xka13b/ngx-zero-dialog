@@ -26,15 +26,24 @@ import { NgxZeroDialogHost } from './ngx-zero-dialog-host';
     </div>
   `,
   styles: [`
+    :host {
+      display: block;
+      background: #fff;
+      border-radius: 12px;
+      width: 420px;
+      max-width: calc(100vw - 32px);
+      height: auto;
+      max-height: calc(100vh - 64px);
+      overflow-y: auto;
+    }
     .ngx-zero-default-host {
       position: relative;
       padding: 24px;
-      min-width: 280px;
     }
     .ngx-zero-default-host-close {
       position: absolute;
-      top: 8px;
-      right: 8px;
+      top: 12px;
+      right: 12px;
       background: none;
       border: none;
       font-size: 24px;
@@ -46,9 +55,6 @@ import { NgxZeroDialogHost } from './ngx-zero-dialog-host';
     }
     .ngx-zero-default-host-close:hover {
       opacity: 1;
-    }
-    .ngx-zero-default-host-content {
-      margin-top: 8px;
     }
   `],
 })

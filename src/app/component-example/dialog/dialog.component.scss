@@ -1,13 +1,17 @@
 :host {
   display: block;
-  padding: 32px;
+}
+
+.greetings {
+  font-size: 18px;
+  text-align: center;
+  padding: 8px 0 16px;
+  color: rgba(0, 0, 0, 0.7);
 }
 
 .form {
-  padding: 24px 0;
   display: flex;
   gap: 12px;
-  align-items: center;
   flex-direction: column;
 
   button,

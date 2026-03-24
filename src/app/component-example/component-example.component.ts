@@ -30,62 +30,55 @@ import {
   ],
 })
 export class ComponentExampleComponent {
-  private readonly ngxZeroDialogService = inject(NgxZeroDialogService);
+  private readonly dialog = inject(NgxZeroDialogService);
 
   readonly nameCtrl = new FormControl('');
 
   readonly mode = signal<'demo' | 'code'>('demo');
 
-  readonly result = signal<ComponentDialogResult | undefined>('');
-
-  readonly htmlCode = `
-    <input type="text" [formControl]="nameCtrl" placeholder="What's your name?" />
-    <button (click)="openComponentBasedDialog()">Open dialog</button>
-  `;
+  readonly result = signal<ComponentDialogResult | undefined>(undefined);
 
   readonly tsCode = `
-    @Component({
-      ...
-    })
-    export class ComponentDialogExample {
-      private readonly ngxZeroDialogService = inject(NgxZeroDialogService);
+    import { NgxZeroDialogService, DIALOG_DATA, DIALOG_REF } from 'ngx-zero-dialog';
+
+    @Component({ ... })
+    export class MyComponent {
+      private readonly dialog = inject(NgxZeroDialogService);
 
       readonly nameCtrl = new FormControl('');
 
-      openComponentBasedDialog() {
-        this.ngxZeroDialogService
-          .openDialog<ComponentDialogResult>(DialogComponent, {
+      openDialog() {
+        this.dialog
+          .openDialog<string>(DialogComponent, {
             hostComponent: AppDialogHostComponent,
-            hostData: {
-              title: 'Component-based dialog',
-            },
-            dialogData: {
-              name: this.nameCtrl.value,
-            },
+            hostData: { title: 'Component-based dialog' },
+            dialogData: { name: this.nameCtrl.value },
           })
-          .subscribe((result) => alert(\`You answered: {result}\`));
+          .subscribe((result) => console.log('Result:', result));
       }
     }
+  `;
 
-
+  readonly dialogCode = `
     export interface ComponentDialogData { name: string; }
-    export type ComponentDialogResult = string;
 
     @Component({
       standalone: true,
       selector: 'app-dialog',
-      templateUrl: 'dialog.component.html',
+      template: \`
+        <div class="greetings">Hello, {{ data.name }}</div>
+        <input type="text" placeholder="How old are you?"
+               (input)="setResult($event)" />
+        <button (click)="close()">Submit</button>
+      \`,
     })
     export class DialogComponent {
       readonly data = inject<ComponentDialogData>(DIALOG_DATA);
-
       private readonly dialogRef = inject(DIALOG_REF);
-
       private readonly result = signal('');
 
       setResult(event: Event) {
-        const value = (event.target as HTMLInputElement).value;
-        this.result.set(value);
+        this.result.set((event.target as HTMLInputElement).value);
       }
 
       close() {
@@ -94,47 +87,32 @@ export class ComponentExampleComponent {
     }
   `;
 
-  readonly dialogTemplateCode = `
-    <div class="greetings">Hello, {{ data.name }}</div>
-    <input
-      type="text"
-      placeholder="How old are you?"
-      (input)="setResult($event)"
-    />
-    <button (click)="close()">Submit</button>
-  `;
-
   readonly dialogHostCode = `
+    import { DialogContentDirective, NgxZeroDialogHost } from 'ngx-zero-dialog';
+
     interface AppDialogHostData { title: string; }
 
     @Component({
       standalone: true,
       selector: 'app-dialog-host',
       template: \`
-        <div class="title">
-          {{ hostData.title }} 
-          <img src="close.svg" (click)="close()">
-        </div>
-
+        <div class="title">{{ hostData.title }}</div>
+        <button class="close" (click)="close()">&times;</button>
         <div class="content">
           <ng-template dialogContent></ng-template>
         </div>
       \`,
       imports: [DialogContentDirective],
     })
-    export class DialogHostComponent extends NgxZeroDialogHost<AppDialogHostData> {
-      constructor() {
-        super();
-      }
+    export class AppDialogHostComponent extends NgxZeroDialogHost<AppDialogHostData> {
+      constructor() { super(); }
 
-      close() {
-        this.dialogRef.close();
-      }
+      close() { this.dialogRef.close(); }
     }
   `;
 
   openComponentBasedDialog() {
-    this.ngxZeroDialogService
+    this.dialog
       .openDialog<ComponentDialogResult>(DialogComponent, {
         hostComponent: DialogHostComponent,
         hostData: {

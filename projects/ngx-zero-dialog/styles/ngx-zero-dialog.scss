@@ -5,10 +5,13 @@ body:has(dialog[open]) {
 dialog.ngx-zero-dialog {
   border: 0;
   padding: 0;
-  display: contents;
+  margin: auto;
+  max-width: none;
+  max-height: none;
   background: transparent;
   box-sizing: border-box;
   -webkit-box-sizing: border-box;
+  overflow: visible;
 }
 
 dialog.ngx-zero-dialog-hidden {

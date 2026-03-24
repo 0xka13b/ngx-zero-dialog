@@ -6,26 +6,29 @@
   ></app-show-code-btn>
 </h2>
 
+<p class="text">
+  For complex dialogs, pass a <code>Component</code> as dialog content.
+  Data is injected via <code>DIALOG_DATA</code>, and the dialog is closed
+  via <code>DIALOG_REF</code>. A custom host provides the title bar and layout.
+</p>
+
 @if (mode() === 'code') {
   <blockquote>
-    To make dialog dimensions works normal in Safari, you should <br />
-    explicitly set <code>height: auto</code> for your dialog host element
+    Safari tip: explicitly set <code>height: auto</code> on your dialog host
+    element to ensure correct dimensions.
   </blockquote>
 
   <mat-tab-group disableRipple>
-    <mat-tab label="HTML">
-      <app-code-snippet language="html" [code]="htmlCode"></app-code-snippet>
-    </mat-tab>
-    <mat-tab label="TS">
+    <mat-tab label="Component">
       <app-code-snippet language="typescript" [code]="tsCode"></app-code-snippet>
     </mat-tab>
-    <mat-tab label="dialog.component.html">
+    <mat-tab label="Dialog">
       <app-code-snippet
-        language="html"
-        [code]="dialogTemplateCode"
+        language="typescript"
+        [code]="dialogCode"
       ></app-code-snippet>
     </mat-tab>
-    <mat-tab label="dialog-host.component.ts">
+    <mat-tab label="Host">
       <app-code-snippet
         language="typescript"
         [code]="dialogHostCode"
@@ -36,7 +39,8 @@
   <div class="form">
     <input type="text" [formControl]="nameCtrl" placeholder="What's your name?" />
     <button (click)="openComponentBasedDialog()">Open dialog</button>
-
-    @if (result(); as result) { Dialog result: {{ result }} }
   </div>
+  @if (result(); as res) {
+    <span class="result">Result: {{ res }}</span>
+  }
 }

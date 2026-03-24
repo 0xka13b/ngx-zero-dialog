@@ -1,0 +1,40 @@
+<h2>
+  Simple dialog (default host)
+  <app-show-code-btn
+    [active]="mode() === 'code'"
+    (click)="toggleCode()"
+  ></app-show-code-btn>
+</h2>
+
+<p class="text">
+  The simplest way to open a dialog &mdash; no custom host component required.
+  A built-in <code>DefaultDialogHostComponent</code> with a close button is used automatically.
+</p>
+
+@if (mode() === 'code') {
+  <mat-tab-group disableRipple>
+    <mat-tab label="HTML">
+      <app-code-snippet language="html" [code]="htmlCode"></app-code-snippet>
+    </mat-tab>
+    <mat-tab label="TS">
+      <app-code-snippet language="typescript" [code]="tsCode"></app-code-snippet>
+    </mat-tab>
+  </mat-tab-group>
+} @else {
+  <div class="form">
+    <button (click)="openDialog(simpleDialog)">Open dialog</button>
+
+    @if (result(); as res) {
+      <span class="result">Result: {{ res }}</span>
+    }
+  </div>
+}
+
+<ng-template #simpleDialog let-dialogRef>
+  <div class="simple-dialog-content">
+    <h3>Hello!</h3>
+    <p>This dialog uses the built-in default host.</p>
+    <p>No custom host component needed.</p>
+    <button (click)="dialogRef.close('confirmed')">Confirm</button>
+  </div>
+</ng-template>

@@ -16,29 +16,39 @@ h2 {
   align-items: center;
 }
 
-mat-tab-group {
-  padding: 12px 0 24px 0;
+.result {
+  font-size: 16px;
+  color: rgba(0, 0, 0, 0.6);
 }
 
-.template-dialog {
+.simple-dialog-content {
+  text-align: center;
   display: flex;
   flex-direction: column;
+  gap: 8px;
   align-items: center;
-  justify-content: center;
-  gap: 16px;
-  text-align: center;
-  font-size: 18px;
+  background: #fff;
 
-  .country {
-    font-family: "Space Grotesk";
-    font-weight: bold;
+  h3 {
+    margin: 0;
+  }
+
+  p {
+    margin: 0;
+    font-size: 16px;
+    line-height: 24px;
+    color: rgba(0, 0, 0, 0.7);
   }
 
   button {
+    margin-top: 8px;
     width: 100%;
     max-width: 200px;
-    margin-top: 8px;
   }
+}
+
+mat-tab-group {
+  padding: 12px 0 24px 0;
 }
 
 app-code-snippet {

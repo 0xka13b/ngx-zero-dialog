@@ -1,41 +1,48 @@
 <h2>
   Template-based dialog
   <app-show-code-btn
-    [active]="this.mode() === 'code'"
+    [active]="mode() === 'code'"
     (click)="toggleCode()"
   ></app-show-code-btn>
 </h2>
 
+<p class="text">
+  For simple dialogs, pass an <code>ng-template</code> directly.
+  The template receives <code>dialogRef</code> and <code>data</code>
+  as implicit context variables. This example also shows a custom host
+  with a configurable close button.
+</p>
+
 @if (mode() === 'demo') {
-<div class="form">
-  <input
-    type="text"
-    [formControl]="countryCtrl"
-    placeholder="Where are you from?"
-  />
-  <button (click)="openTemplateBasedDialog(dialogTpl)">Open dialog</button>
-</div>
+  <div class="form">
+    <input
+      type="text"
+      [formControl]="countryCtrl"
+      placeholder="Where are you from?"
+    />
+    <button (click)="openTemplateBasedDialog(dialogTpl)">Open dialog</button>
+  </div>
 } @else {
-<mat-tab-group disableRipple>
-  <mat-tab label="HTML">
-    <app-code-snippet language="html" [code]="htmlCode"></app-code-snippet>
-  </mat-tab>
-  <mat-tab label="TS">
-    <app-code-snippet language="typescript" [code]="tsCode"></app-code-snippet>
-  </mat-tab>
-  <mat-tab label="dialog-host.component.ts">
-    <app-code-snippet
-      language="typescript"
-      [code]="dialogHostCode"
-    ></app-code-snippet>
-  </mat-tab>
-</mat-tab-group>
+  <mat-tab-group disableRipple>
+    <mat-tab label="Template">
+      <app-code-snippet language="html" [code]="htmlCode"></app-code-snippet>
+    </mat-tab>
+    <mat-tab label="Component">
+      <app-code-snippet language="typescript" [code]="tsCode"></app-code-snippet>
+    </mat-tab>
+    <mat-tab label="Host">
+      <app-code-snippet
+        language="typescript"
+        [code]="dialogHostCode"
+      ></app-code-snippet>
+    </mat-tab>
+  </mat-tab-group>
 }
 
 <ng-template #dialogTpl let-dialogRef let-data="data">
   <div class="template-dialog">
     Your country is <span class="country">{{ data.country || 'Unknown' }}</span>
-  
+
     <button (click)="dialogRef.close()">Got it</button>
   </div>
 </ng-template>

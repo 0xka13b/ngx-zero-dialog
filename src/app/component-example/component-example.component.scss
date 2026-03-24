@@ -10,6 +10,13 @@
   align-items: center;
 }
 
+.result {
+  font-size: 16px;
+  color: rgba(0, 0, 0, 0.6);
+  padding: 0 0 24px 0;
+  display: block;
+}
+
 mat-tab-group {
   padding: 12px 0 24px 0;
 }

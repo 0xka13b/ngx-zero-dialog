@@ -1,31 +1,33 @@
 :host {
   display: block;
   background: #fff;
-  padding: 12px;
   border-radius: 12px;
   position: relative;
-  width: 500px;
-  max-height: 500px;
+  width: 420px;
+  max-width: calc(100vw - 32px);
   height: auto;
-  max-height: 500px;
-
-  @media (max-width: 500px) {
-    width: 300px;
-    height: 400px;
-    padding: 8px;
-  }
+  max-height: calc(100vh - 64px);
+  overflow-y: auto;
 }
 
 .title {
   text-align: center;
-  font-size: 24px;
+  font-size: 22px;
   font-weight: bold;
-  padding: 0 32px;
+  padding: 16px 40px 0;
+
+  @media (max-width: 500px) {
+    font-size: 18px;
+  }
+}
+
+.content {
+  padding: 8px 24px 24px;
 }
 
 .close {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 14px;
+  right: 14px;
   cursor: pointer;
 }
