@@ -20,12 +20,23 @@ export interface IDialogConfig {
   closeOnBackdropClick?: boolean;
 
   /**
+   * Determines whether the dialog should close when the user presses the Escape key.
+   * Defaults to `true` if not specified.
+   *
+   * @type {boolean | undefined}
+   * @optional
+   */
+  closeOnEsc?: boolean;
+
+  /**
    * The host component that acts as the container for the dialog content.
    * This component is responsible for rendering the dialog and its layout.
+   * If not provided, a built-in default host with a close button is used.
    *
-   * @type {Component}
+   * @type {Component | undefined}
+   * @optional
    */
-  hostComponent: Component;
+  hostComponent?: Component;
 
   /**
    * Data specific to the host component, allowing customization of the host's behavior or appearance.
@@ -43,7 +54,7 @@ export interface IDialogConfig {
    * @type {string | undefined}
    * @optional
    */
-  dialogNodeClass?: string;
+  dialogNodeClass?: string | string[];
 
   /**
    * Data to be passed to the dialog content component or template.

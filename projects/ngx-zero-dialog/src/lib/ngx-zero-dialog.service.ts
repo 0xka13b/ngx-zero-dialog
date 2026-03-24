@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 import { defer, finalize, Observable, take } from 'rxjs';
 
+import { DefaultDialogHostComponent } from './default-dialog-host.component';
 import { DialogRef } from './dialog-ref';
 import { Component } from './models/component.interface';
 import { IDialogConfig } from './models/dialog-config.interface';
@@ -61,13 +62,6 @@ export class NgxZeroDialogService {
     config?: IDialogConfig
   ): Observable<DialogResult<Result>> {
     return defer(() => {
-      if (!config?.hostComponent) {
-        throw new Error(
-          'NgxZeroDialog: `hostComponent` is required in dialog config. ' +
-            'Provide a component that extends NgxZeroDialogHost.'
-        );
-      }
-
       const normalizedConfig = this.normalizeConfig(config);
 
       const dialogRef = this.createDialogRef<Result>(normalizedConfig);
@@ -171,7 +165,10 @@ export class NgxZeroDialogService {
     newDialog.classList.add('ngx-zero-dialog');
 
     if (config.dialogNodeClass) {
-      newDialog.classList.add(config.dialogNodeClass);
+      const classes = Array.isArray(config.dialogNodeClass)
+        ? config.dialogNodeClass
+        : [config.dialogNodeClass];
+      newDialog.classList.add(...classes);
     }
 
     if (config.animated) {
@@ -229,8 +226,9 @@ export class NgxZeroDialogService {
   ): WithRequiredProperties<IDialogConfig> {
     return {
       closeOnBackdropClick: config?.closeOnBackdropClick ?? true,
+      closeOnEsc: config?.closeOnEsc ?? true,
       dialogData: config?.dialogData ?? {},
-      hostComponent: config?.hostComponent,
+      hostComponent: config?.hostComponent ?? DefaultDialogHostComponent,
       animated:
         this.ngxZeroDialogConfig.enableAnimations ?? config?.animated ?? true,
       hostData: config?.hostData ?? {},

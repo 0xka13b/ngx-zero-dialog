@@ -54,7 +54,11 @@ export class NgxZeroDialogHost<HostData> {
   readonly hostData = inject<HostData>(HOST_DATA);
 
   constructor() {
-    this.#closeOnEsc();
+    if (this.dialogConfig.closeOnEsc !== false) {
+      this.#closeOnEsc();
+    } else {
+      this.#preventEsc();
+    }
     if (this.dialogConfig.closeOnBackdropClick) {
       this.#closeOnBackdropClick();
     }
@@ -85,6 +89,12 @@ export class NgxZeroDialogHost<HostData> {
     this.dialogRef.nativeDialog.addEventListener('cancel', (event) => {
       event.preventDefault();
       this.dialogRef.close();
+    });
+  }
+
+  #preventEsc() {
+    this.dialogRef.nativeDialog.addEventListener('cancel', (event) => {
+      event.preventDefault();
     });
   }
 }

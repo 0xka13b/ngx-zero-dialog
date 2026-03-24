@@ -1,5 +1,9 @@
-import { Subject } from 'rxjs';
+import { from, isObservable, Observable, of, Subject, take } from 'rxjs';
 import { DialogResult } from './models/dialog-result.type';
+
+export type BeforeCloseGuard<Result = unknown> = (
+  value?: DialogResult<Result>
+) => boolean | Observable<boolean> | Promise<boolean>;
 
 /**
  * A reference to a dialog, providing methods to control its lifecycle and observe its closure.
@@ -24,18 +28,50 @@ export class DialogRef<Result = unknown> {
    */
   readonly closed$ = this.#_closed$.asObservable();
 
+  #beforeCloseGuard?: BeforeCloseGuard<Result>;
+
   constructor(
     readonly nativeDialog: HTMLDialogElement,
     readonly animated?: boolean
   ) {}
 
   /**
+   * Registers a guard function that is called before the dialog closes.
+   * If the guard returns false, the close is prevented.
+   *
+   * @param {BeforeCloseGuard<Result>} guard A function returning boolean, Observable<boolean>, or Promise<boolean>.
+   */
+  beforeClose(guard: BeforeCloseGuard<Result>) {
+    this.#beforeCloseGuard = guard;
+  }
+
+  /**
    * Closes the dialog and optionally emits a result.
+   * If a beforeClose guard is registered, it is evaluated first.
    * If animations are enabled, the dialog waits for the transition to complete before fully closing.
    *
    * @param {DialogResult<Result>} [value] Optional result to emit upon closure.
    */
   close(value?: DialogResult<Result>) {
+    if (this.#beforeCloseGuard) {
+      const result = this.#beforeCloseGuard(value);
+      const result$ = isObservable(result)
+        ? result
+        : result instanceof Promise
+          ? from(result)
+          : of(result);
+
+      result$.pipe(take(1)).subscribe((canClose) => {
+        if (canClose) {
+          this.#doClose(value);
+        }
+      });
+    } else {
+      this.#doClose(value);
+    }
+  }
+
+  #doClose(value?: DialogResult<Result>) {
     if (this.animated) {
       this.#terminateAnimatedDialog(value);
     } else {
