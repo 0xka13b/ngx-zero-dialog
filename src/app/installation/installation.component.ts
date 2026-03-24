@@ -14,22 +14,30 @@ import { CodeSnippetComponent } from '../components/code-snippet/code-snippet.co
 })
 export class InstallationComponent {
   readonly installCode = `
+    npm install ngx-zero-dialog
+    # or
     yarn add ngx-zero-dialog
   `;
 
   readonly providerCode = `
-    import { provideNgxDialog } from 'ngx-zero-dialog';
+    import { provideNgxZeroDialog } from 'ngx-zero-dialog';
 
-    providers: [ provideNgxDialog({ containerNodeID: 'ngx-zero-dialog-container' }) ]
+    export const appConfig: ApplicationConfig = {
+      providers: [
+        provideNgxZeroDialog({
+          containerNodeID: 'ngx-zero-dialog-container',
+        }),
+      ],
+    };
   `;
 
   readonly containerCode = `
+    <!-- In your root component template (e.g. app.component.html) -->
     <div id="ngx-zero-dialog-container"></div>
   `;
 
   readonly importStylesCode = `
-    assets: [
-      "node_modules/ngx-zero-dialog/styles/ngx-zero-dialog.scss",
-    ]
+    /* In your global styles.scss */
+    @import "ngx-zero-dialog/styles/ngx-zero-dialog.scss";
   `;
 }

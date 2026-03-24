@@ -2,7 +2,7 @@
     <div class="code-snippet" [highlight]="code()" [language]="language()"></div>
 </pre>
 <div class="copy" (click)="copy()">
-  @if (showCopied | async) { <span class="copied-msg">Copied!</span> } @else {
+  @if (showCopied()) { <span class="copied-msg">Copied!</span> } @else {
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="16"

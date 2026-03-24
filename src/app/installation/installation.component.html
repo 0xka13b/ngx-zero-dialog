@@ -1,30 +1,30 @@
 <h2>Installation and set-up</h2>
 
-<p class="text">Install ngx-zero-dialog</p>
+<p class="text">1. Install ngx-zero-dialog</p>
 <app-code-snippet [code]="installCode" language="javascript"></app-code-snippet>
 
 <p class="text">
-  Provide configuration in <code>app.config.ts</code> or
-  <code>app.module.ts</code>
+  2. Provide configuration in <code>app.config.ts</code> (or in your module's
+  <code>providers</code> array)
 </p>
 <app-code-snippet
   [code]="providerCode"
-  language="javascript"
+  language="typescript"
 ></app-code-snippet>
 
 <p class="text">
-  Setup dialog container in your root component with specific id
+  3. Add a dialog container element in your root component template
 </p>
 <app-code-snippet
   [code]="containerCode"
-  language="javascript"
+  language="html"
 ></app-code-snippet>
 
 <p class="text">
-  Add styles in assets in your <code>angular.json</code> file. It comes with
-  pre-built dialog enter/leave animation and some utility styles
+  4. Import the library styles in your global <code>styles.scss</code>.
+  Includes pre-built enter/leave animations and utility styles.
 </p>
 <app-code-snippet
   [code]="importStylesCode"
-  language="javascript"
+  language="css"
 ></app-code-snippet>

@@ -1,7 +1,17 @@
 <h2>Custom animations</h2>
 
 <p class="text">
-  Ngx-zero-dialog comes with simple pre-built animation, take a look:
+  ngx-zero-dialog uses CSS class toggling for enter/leave animations.
+  Two classes are applied to the <code>&lt;dialog&gt;</code> element:
+</p>
+
+<ul class="text">
+  <li><code>.ngx-zero-dialog-hidden</code> &mdash; starting state (before open transition)</li>
+  <li><code>.ngx-zero-dialog-visible</code> &mdash; added after <code>showModal()</code>, removed on close</li>
+</ul>
+
+<p class="text">
+  The built-in animation is a simple opacity fade:
 </p>
 <app-code-snippet
   language="css"
@@ -9,14 +19,12 @@
 ></app-code-snippet>
 
 <p class="text mt-24">
-  This demo page uses customized animation which plays with transform property.
-  <code>.ngx-zero-dialog-hidden</code> is a starting hidden state of
-  dialog, and <code>.ngx-zero-dialog-visible</code> is a final state of
-  dialog. When <code>enableAnimations: false</code> is provided in config - only
-  <code>.ngx-zero-dialog-visible</code> will be applied to dialog element and
-  dialog won't play animation. <br>
-
-  To adjust animation, add this scss in your global styles.scss file:
+  This demo page uses a custom slide-up animation by overriding the transform property.
+  To customize animations, add overrides in your global <code>styles.scss</code>:
 </p>
-
 <app-code-snippet language="css" [code]="customAnimation"></app-code-snippet>
+
+<p class="text">
+  To disable animations entirely, set <code>enableAnimations: false</code> in the global config
+  or <code>animated: false</code> per dialog.
+</p>

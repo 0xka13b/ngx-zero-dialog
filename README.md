@@ -1,199 +1,323 @@
 # ngx-zero-dialog
 
-A lightweight Angular library for managing dialogs using the native `<dialog>` API. With `ngx-zero-dialog`, you can create dynamic, accessible, and customizable dialogs in your Angular applications.  
-> ⚠️ Requires Angular 16 or newer!
+A lightweight, zero-dependency Angular library for managing dialogs using the native HTML `<dialog>` API. Accessible, customizable, and fully driven by CSS animations.
 
-[LIVE DEMO](https://ko1ebayev.github.io/ngx-zero-dialog/)
+> Requires Angular 16 or newer
 
-## Installation and set-up
+[Live Demo](https://ko1ebayev.github.io/ngx-zero-dialog/)
 
-1. Install in application:
+## Quick Start
+
+Install the library:
+
 ```bash
+npm install ngx-zero-dialog
+# or
 yarn add ngx-zero-dialog
 ```
-2. Place dialog container in your root component template  
+
+Add a dialog container to your root component template (e.g. `app.component.html`):
+
 ```html
-<div id="ngx-dialog-host"></div>
+<div id="ngx-zero-dialog-container"></div>
 ```
-3. Provide Configuration
+
+Provide the configuration in your app config:
+
 ```typescript
 import { provideNgxZeroDialog } from 'ngx-zero-dialog';
 
-@NgModule({
+export const appConfig: ApplicationConfig = {
   providers: [
-    // other providers
-    provideNgxZeroDialog({ containerNodeID: 'ngx-dialog-host' }),
+    provideNgxZeroDialog({ containerNodeID: 'ngx-zero-dialog-container' }),
   ],
-})
-export class AppModule {}
+};
 ```
 
-## Key points behind ngx-zero-dialog  
+Import the library styles in your global stylesheet:
 
-**Each dialog consist of three elements:**
- - native `<dialog>` element
- - host component with <ng-tempate> placeholder to insert target view
- - the target view itself, it could be a `Component` or a `TemplateRef`
+```scss
+@import "ngx-zero-dialog/styles/ngx-zero-dialog.scss";
+```
 
-**Stacking context or z-index problems:**  
-"HTML dialogs offer a great advantage in managing stacked contexts. Each dialog exists in its own 'layer,' ensuring that dialogs and their child views never intersect, regardless of the z-index or how nodes are positioned.
+Open a dialog:
 
-**Host component approach**:  
-`openDialog()` requires a `host` parameter, which is simply a component containing a content insertion point in its template: `<ng-template dialogContent></ng-template>`. This is where the target content will be rendered.
+```typescript
+import { NgxZeroDialogService } from 'ngx-zero-dialog';
 
-ngx-zero-dialog exports `NgxZeroDialogHost` class as a base class for host components to extend it.   
+@Component({ ... })
+export class MyComponent {
+  private readonly dialog = inject(NgxZeroDialogService);
 
-Host components simplify maintaining dialogs with a common layout across large applications. A good approach is to create a dedicated service for each host.
+  open(template: TemplateRef<unknown>) {
+    this.dialog.openDialog(template).subscribe((result) => {
+      console.log('Dialog closed with:', result);
+    });
+  }
+}
+```
 
-**You need only css for enter/leave animations**  
-Ngx-zero-dialog supports transition animations by applying specific classes for hidden and visible states. Here's an example of the built-in simple animation:  
-```css
+```html
+<button (click)="open(myDialog)">Open</button>
+
+<ng-template #myDialog let-dialogRef>
+  <p>Hello from a dialog!</p>
+  <button (click)="dialogRef.close('done')">Close</button>
+</ng-template>
+```
+
+That's it — no custom host component needed. A built-in default host with a close button is used automatically.
+
+> **NgModule setup**: If you're not using standalone APIs, add `provideNgxZeroDialog(...)` to your module's `providers` array instead.
+
+---
+
+## Core Concepts
+
+### Three-Element Dialog Structure
+
+Each dialog consists of three elements:
+
+1. **Native `<dialog>` element** — created automatically, provides browser-level modal behavior (focus trapping, backdrop, stacking context)
+2. **Host component** — the dialog's frame/chrome (title bar, close button, layout). A built-in default is provided, or you can create your own.
+3. **Content** — your actual dialog body, passed as a `Component` or `TemplateRef`
+
+### Stacking Context
+
+HTML dialogs exist in their own top-layer, ensuring that dialogs and their child views never intersect regardless of z-index or how nodes are positioned. No overlay system or CDK is needed.
+
+### Observable-Based API
+
+`openDialog()` returns a cold `Observable` — the dialog is only created when subscribed to. The observable emits a single result value when the dialog closes, then completes.
+
+---
+
+## API Reference
+
+### `NgxZeroDialogService`
+
+The main service. Has one public method:
+
+```typescript
+openDialog<Result>(
+  componentOrTemplate: Component | TemplateRef<any>,
+  config?: IDialogConfig,
+): Observable<DialogResult<Result>>
+```
+
+### `IDialogConfig`
+
+All fields are optional:
+
+```typescript
+interface IDialogConfig {
+  /** Close when clicking outside the dialog. Default: true */
+  closeOnBackdropClick?: boolean;
+
+  /** Close when pressing Escape. Default: true */
+  closeOnEsc?: boolean;
+
+  /**
+   * Host component wrapping the dialog content.
+   * If omitted, a built-in DefaultDialogHostComponent is used.
+   */
+  hostComponent?: Component;
+
+  /** Data injected into the host component via HOST_DATA token */
+  hostData?: IHostData;
+
+  /** CSS class(es) added to the native <dialog> element */
+  dialogNodeClass?: string | string[];
+
+  /** Data injected into the content via DIALOG_DATA token */
+  dialogData?: IDialogData;
+
+  /** Enable open/close CSS transitions. Default: true */
+  animated?: boolean;
+}
+```
+
+### `DialogRef<Result>`
+
+A reference to an open dialog, available in both host and content components via the `DIALOG_REF` token.
+
+```typescript
+class DialogRef<Result = unknown> {
+  /** The underlying native <dialog> element */
+  readonly nativeDialog: HTMLDialogElement;
+
+  /** Observable that emits the result when the dialog closes */
+  readonly closed$: Observable<DialogResult<Result>>;
+
+  /** Close the dialog, optionally emitting a result value */
+  close(value?: DialogResult<Result>): void;
+
+  /**
+   * Register a guard that is called before close.
+   * Return false (or Observable<false> / Promise<false>) to prevent closing.
+   */
+  beforeClose(guard: BeforeCloseGuard<Result>): void;
+}
+```
+
+`DialogResult<Result>` is `Result | undefined` — `undefined` is emitted when the dialog closes without a value.
+
+### `BeforeCloseGuard`
+
+```typescript
+type BeforeCloseGuard<Result> = (
+  value?: DialogResult<Result>
+) => boolean | Observable<boolean> | Promise<boolean>;
+```
+
+Example — confirm before closing:
+
+```typescript
+@Component({ ... })
+export class MyDialog {
+  private readonly dialogRef = inject<DialogRef<string>>(DIALOG_REF);
+
+  constructor() {
+    this.dialogRef.beforeClose(() => confirm('Discard changes?'));
+  }
+}
+```
+
+### Injection Tokens
+
+| Token | Available in | Value |
+|-------|-------------|-------|
+| `DIALOG_REF` | Host + Content | `DialogRef` instance |
+| `DIALOG_DATA` | Content | The `dialogData` object from config |
+| `DIALOG_CONFIG` | Host | The full `IDialogConfig` |
+| `HOST_DATA` | Host | The `hostData` object from config |
+
+---
+
+## Default Host vs. Custom Host
+
+### Default Host
+
+When you omit `hostComponent` from the config, a built-in `DefaultDialogHostComponent` is used. It provides a minimal wrapper with a close button. Good for simple use cases.
+
+### Custom Host
+
+For a consistent dialog frame across your app (title bar, footer, custom styling), create your own host:
+
+1. Extend `NgxZeroDialogHost<T>` where `T` is the type of your `hostData`
+2. Import `DialogContentDirective` and place `<ng-template dialogContent></ng-template>` in your template
+3. Call `super()` in the constructor
+
+```typescript
+interface MyHostData {
+  title: string;
+}
+
+@Component({
+  standalone: true,
+  selector: 'app-dialog-host',
+  imports: [DialogContentDirective],
+  template: `
+    <div class="header">
+      <h2>{{ hostData.title }}</h2>
+      <button (click)="close()">&times;</button>
+    </div>
+    <div class="body">
+      <ng-template dialogContent></ng-template>
+    </div>
+  `,
+})
+export class AppDialogHostComponent extends NgxZeroDialogHost<MyHostData> {
+  constructor() {
+    super();
+  }
+
+  close() {
+    this.dialogRef.close();
+  }
+}
+```
+
+Use it:
+
+```typescript
+this.dialog.openDialog(MyContentComponent, {
+  hostComponent: AppDialogHostComponent,
+  hostData: { title: 'Settings' },
+}).subscribe();
+```
+
+`NgxZeroDialogHost` automatically injects `dialogRef`, `dialogConfig`, and `hostData` for you. It also handles backdrop-click and Escape key behavior based on the config.
+
+---
+
+## Animations
+
+ngx-zero-dialog uses CSS class toggling for enter/leave animations. Two classes are applied to the `<dialog>` element:
+
+- `ngx-zero-dialog-hidden` — applied on creation (before open transition)
+- `ngx-zero-dialog-visible` — added after `showModal()` (triggers open), removed on close (triggers close)
+
+The built-in styles provide a simple opacity fade:
+
+```scss
 dialog.ngx-zero-dialog-hidden {
   opacity: 0;
-  transition: all 0.2s ease-in-out;
+  transition: opacity 0.2s ease-in-out;
 
   &::backdrop {
     opacity: 0;
-    transition: all 0.2s ease-in-out;
+    transition: opacity 0.2s ease-in-out;
   }
 }
 
 dialog.ngx-zero-dialog-visible {
   opacity: 1;
+  transition: opacity 0.2s ease-in-out;
 
   &::backdrop {
     opacity: 1;
     background: rgba(0, 0, 0, 0.65);
     backdrop-filter: blur(5px);
+    transition: opacity 0.2s ease-in-out;
   }
 }
 ```
 
+Override these in your global styles for custom animations (e.g. slide-in):
 
-# API Breakdown
-
-## NgxZeroDialogService
-The `NgxDialogService` provides a simple API to open dialogs, just one public method:
-```typescript
-export class NgxZeroDialogService {
-    openDialog<T>(
-      componentOrTemplate: Component | TemplateRef,
-      config: IDialogConfig,
-    ): Observable<DialogResult<T>>;
-}
-```  
-Since `openDialog()` returns an observable, the dialog will only open when the observable is subscribed to.
-
-
-## `IDialogConfig` interface
-```typescript
-export interface IDialogConfig {
-  /**
-   * Determines whether the dialog should close when the user clicks outside the dialog (on the backdrop).
-   *
-   * Defaults to `true` if not specified.
-   */
-  closeOnBackdropClick?: boolean;
-
-  /**
-   * The host component that acts as the container for the dialog content.
-   * This component is responsible for rendering the dialog and its layout.
-   */
-  hostComponent: Component;
-
-  /**
-   * Data specific to the host component, allowing customization of the host's behavior or appearance.
-   * This data is injected into the host component at runtime.
-   */
-  hostData?: IHostData;
-
-  /**
-   * A CSS class or list of classes to be added to the root `<dialog>` element.
-   * This can be used to customize the dialog's appearance.
-   */
-  dialogNodeClass?: string;
-
-  /**
-   * Data to be passed to the dialog content component or template.
-   * This data is injected into the dynamic content at runtime.
-   */
-  dialogData?: IDialogData;
-
-  /**
-   * Specifies whether the dialog should use animations for its appearance and disappearance.
-   * If not specified, it may default to the global animation setting.
-   *
-   * Enabled by default
-   */
-  animated?: boolean;
+```scss
+dialog.ngx-zero-dialog-hidden {
+  transform: translateY(100vh);
 }
 
-```
-
-## `IDialogData` and `IHostData` interfaces
-Both interfaces allow passing custom data to the dialog's content or host. The data should be an object and can include any properties you need.
-```typescript
-export type DialogData = object;
-```
-When rendering a view and attaching it to Angular's component tree, NgxZeroDialog provides the `DIALOG_DATA` token in the target view and the `HOST_DATA` token in the host component. These tokens can be accessed by injecting them into the respective components:
-```typescript
-  @Component({...})
-  export class MyDialog {
-    readonly dialogData = inject<DataYouExpect>(DIALOG_DATA);
-  }
-```  
-Data is an empty object `{}` by default if not provided.
-
-## Host component
-There are two requirements for the host component:
-1. Host should extend `NgxZeroDialogHost<T>` base class, where `T` is type of `HOST_DATA` you expect to get. The `HOST_DATA` token is already inejcted in `NgxZeroDialogHost` you just need to call `super()`. 
-2. Host component should import `DialogContent` directive which acts as a content insertion point for traget views and should exist in template: `<ng-template dialogContent></ng-template>`  
-```typescript
-@Component({
-  standalone: true,
-  selector: 'dialog-host',
-  template: `<ng-template dialogContent></ng-template>`,
-  imports: [DialogContentDirective, CommonModule],
-})
-export class DialogHostComponent extends NgxZeroDialogHost<HostDataYouExpect> {
-  constructor() {
-    super();
-  }
+dialog.ngx-zero-dialog-visible {
+  transform: translateY(0);
 }
 ```
 
+Disable animations globally via `provideNgxZeroDialog({ ..., enableAnimations: false })` or per-dialog with `animated: false` in the config.
 
-## DialogRef
-All host components, as well as target components or templates, include an injected `DIALOG_REF` token. The `DialogRef` class provides control over the dialog's lifecycle directly from within the host or the target view:
+---
+
+## Global Configuration
+
 ```typescript
-export class DialogRef<Result> {
-  /**
-   * Closes the dialog and optionally emits a result.
-   * If animations are enabled, the dialog waits for the transition to complete before fully closing.
-   *
-   * @param {DialogResult<Result>} [value] Optional result to emit upon closure.
-   */
-  close(value?: DialogResult<Result>): void
-}
-```  
-The provided value will be emitted in the subscription upon closing. `DialogResult` is a union type `Result | undefined`, where undefined is emitted as the default value when the dialog is closed without a result.
+interface INgxZeroDialogConfig {
+  /** ID of the container element where dialogs are appended. Required. */
+  containerNodeID: string;
 
-`DIALOG_REF` is designed to handle host-specific logic, such as closing the dialog when a button is clicked. Here's an example of how you might use it:
-```typescript
-@Component({ ... })
-export class AlertDialogComponent {
-    readonly dialogRef = inject<boolean>(DIALOG_REF);
-
-    close(result: boolean) {
-      this.dialogRef.close(result);
-    }
+  /** Globally enable/disable animations. Default: true */
+  enableAnimations?: boolean;
 }
 ```
-As mentioned before, `DIALOG_REF` is already injected in `NgxZeroDialogHost` class, like a `HOST_DATA`  
 
+---
 
+## License
 
-# Let's start building!  
-## I recommend exploring the demo page with code examples, as it demonstrates how each dialog is reflected in the DOM. You can check it out here: [ngx-zero-dialog demo](https://ko1ebayev.github.io/ngx-zero-dialog/)
+MIT
 
-Feel free to open discussions, raise issues, or reach out to me on Telegram or via email. I'm happy to help!
+## Contributing
+
+Feel free to open discussions, raise issues, or submit pull requests on [GitHub](https://github.com/ko1ebayev/ngx-zero-dialog).

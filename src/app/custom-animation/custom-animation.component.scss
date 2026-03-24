@@ -1,5 +1,26 @@
+:host {
+    display: block;
+    padding: 24px 0;
+}
+
 app-code-snippet {
     border-radius: 12px;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+
+    li {
+        padding: 4px 0;
+        font-size: 18px;
+        line-height: 28px;
+
+        &::before {
+            content: "\2022";
+            margin-right: 8px;
+        }
+    }
 }
 
 .mt-24 {

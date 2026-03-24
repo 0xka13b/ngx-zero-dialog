@@ -3,6 +3,11 @@ import { Component } from '@angular/core';
 import { DialogContentDirective } from './dialog-content.directive';
 import { NgxZeroDialogHost } from './ngx-zero-dialog-host';
 
+/**
+ * Built-in default dialog host component.
+ * Used automatically when no `hostComponent` is specified in the dialog config.
+ * Provides a minimal wrapper with a close button and content insertion point.
+ */
 @Component({
   standalone: true,
   selector: 'ngx-zero-default-dialog-host',
