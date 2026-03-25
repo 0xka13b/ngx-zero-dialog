@@ -4,7 +4,7 @@ A lightweight, zero-dependency Angular library for managing dialogs using the na
 
 > Requires Angular 16 or newer
 
-[Live Demo](0xka13b.github.io/ngx-zero-dialog/)
+[Live Demo](https://0xka13b.github.io/ngx-zero-dialog/)
 
 ## Quick Start
 
